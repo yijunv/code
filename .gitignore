@@ -1,0 +1,16 @@
+﻿# 本地小数据集（每个病例 200MB+，绝不能进 git）
+kits19_small/
+
+# 本地输出（模型权重、图片）
+output/
+
+# Python 缓存
+__pycache__/
+.ipynb_checkpoints/
+
+# 模型权重文件（防止误提交）
+*.pth
+*.pt
+
+# 本地 Python 虚拟环境（绝不能进 git）
+.venv/
