@@ -14,3 +14,7 @@ __pycache__/
 
 # 本地 Python 虚拟环境（绝不能进 git）
 .venv/
+
+# 实验产物（模型/指标/manifest；manifest 如需入库可 git add -f）
+experiments/
+
