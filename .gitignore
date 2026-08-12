@@ -1,5 +1,6 @@
 ﻿# 本地小数据集（每个病例 200MB+，绝不能进 git）
 kits19_small/
+kits19_small.zip
 
 # 本地输出（模型权重、图片）
 output/
