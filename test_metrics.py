@@ -34,5 +34,5 @@ if __name__ == "__main__":
         writer = csv.DictWriter(f, fieldnames=list(metrics_result.keys()))
         writer.writeheader()
         writer.writerow(metrics_result)
-    print("\n✅ 已生成标准指标表格：实验指标汇总.csv")
-    print("✅ 统一指标库自测完成，无报错即可交付团队使用！")
+    print("\n已生成标准指标表格：实验指标汇总.csv")
+    print(" 统一指标库自测完成，无报错即可交付团队使用！")
