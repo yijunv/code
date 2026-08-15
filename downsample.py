@@ -5,11 +5,15 @@
 等小样本实验子集，并把每个实验的病例清单固化为 manifest.json（接口契约 C：
 seed / 数据量 / 病例清单 / 配置，供人员4 做统计检验与 Risk-Coverage 曲线）。
 
-口径（与 总模型代码进行中.ipynb 模块3/模块4 完全一致）：
-- 按病例划分，禁止同一病例的切片跨集合（避免数据泄漏）；
-- seed 固定并写入 manifest，保证可复现；
+口径说明：
+- 划分逻辑与 总模型代码进行中.ipynb 模块4 逐行一致：按病例划分、seed=42、
+  n_train=int(n*train_ratio)、n_val=int(n*val_ratio)、test 取剩余，禁止同一病例
+  的切片跨集合（避免数据泄漏）；
+- 病例扫描兼容 .nii 与 .nii.gz（模块3 口径），本工具返回病例名（notebook 返回全路径），
+  排序与过滤逻辑一致；
 - 测试集永远冻结：test 始终取全量划分的测试病例，不做任何降采样；
-- 兼容 .nii 与 .nii.gz（沿用 notebook 已修复的口径）。
+- 注意：本工具刻意自带与 notebook 相同的划分函数（保证可独立运行、Kaggle 可用），
+  修改划分逻辑时必须同步 notebook 模块4 与这里的实现，或后续抽到 src/ 后两边 import。
 
 命令行用法（本地 4 病例快速验证）：
     python downsample.py --data-root E:/大创/kits19_small --out-dir E:/大创/experiments \
@@ -36,8 +40,11 @@ def _find_volume(case_dir, name):
     return None
 
 
-def scan_valid_cases(data_root):
-    """返回 data_root 下同时具有 imaging 与 segmentation 的病例名列表（排序后）。"""
+def scan_valid_cases(data_root, max_cases=None):
+    """返回 data_root 下同时具有 imaging 与 segmentation 的病例名列表（排序后）。
+
+    max_cases 不为 None 时只取前 N 个（与 notebook 模块3 的 max_cases 口径一致）。
+    """
     names = []
     for entry in sorted(os.listdir(data_root)):
         case_dir = os.path.join(data_root, entry)
@@ -45,11 +52,13 @@ def scan_valid_cases(data_root):
             continue
         if _find_volume(case_dir, "imaging") and _find_volume(case_dir, "segmentation"):
             names.append(entry)
+    if max_cases is not None and len(names) > max_cases:
+        names = names[:max_cases]
     return names
 
 
 def split_cases(case_dirs, train_ratio, val_ratio, seed):
-    """按病例划分 train/val/test，返回 (train, val, test)。与 notebook 模块4 口径一致。"""
+    """按病例划分 train/val/test，返回 (train, val, test)。与 notebook 模块4 逐行一致。"""
     rng = random.Random(seed)
     cases = list(case_dirs)
     rng.shuffle(cases)
@@ -67,7 +76,7 @@ def downsample_train_cases(train_cases, fraction, seed):
 
     - fraction 为 (0, 1] 的浮点数，例如 0.10 / 0.20；
     - 用 seed 打乱后取前 n 个（确定性，可复现）；
-    - n = int(len * fraction)，不足 1 个时取 1（保证小数据也能出实验）。
+    - n = int(len * fraction)，不足 1 个时取 1，并打印提示（保证小数据也能出实验）。
     """
     if not (0.0 < fraction <= 1.0):
         raise ValueError("fraction 必须在 (0, 1] 之间，当前为 %r" % fraction)
@@ -77,11 +86,19 @@ def downsample_train_cases(train_cases, fraction, seed):
     n = int(len(shuffled) * fraction)
     if n == 0 and shuffled:
         n = 1
+        print("[警告] 训练集 {} 例 × {:.0f}% 不足 1 例，已保底取 1 例：{}".format(
+            len(train_cases), fraction * 100, shuffled[0]))
     return shuffled[:n]
 
 
-def write_manifest(experiment_dir, *, seed, fraction, train_cases, val_cases, test_cases,
-                   n_total_cases, data_root, img_size=256):
+def load_manifest(path):
+    """读取 manifest.json，返回 dict（供 CLI 汇总 / 复现实验用）。"""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def write_manifest(experiment_dir, *, seed, fraction, train_ratio, val_ratio, max_cases,
+                   train_cases, val_cases, test_cases, n_total_cases, data_root, img_size=256):
     """按接口契约 C 写出 manifest.json，返回文件路径。"""
     os.makedirs(experiment_dir, exist_ok=True)
     manifest = {
@@ -90,6 +107,10 @@ def write_manifest(experiment_dir, *, seed, fraction, train_cases, val_cases, te
         "img_size": img_size,
         "seed": seed,
         "data_fraction": fraction,
+        "train_ratio": train_ratio,
+        "val_ratio": val_ratio,
+        "test_ratio": round(1.0 - train_ratio - val_ratio, 4),
+        "max_cases": max_cases,
         "n_total_cases": n_total_cases,
         "n_train_cases": len(train_cases),
         "n_val_cases": len(val_cases),
@@ -111,9 +132,7 @@ def build_experiments(data_root, out_dir, fractions=(0.10, 0.20), seed=42,
 
     返回生成的 manifest 文件路径列表。
     """
-    all_names = scan_valid_cases(data_root)
-    if max_cases is not None and len(all_names) > max_cases:
-        all_names = all_names[:max_cases]
+    all_names = scan_valid_cases(data_root, max_cases)
     train_cases, val_cases, test_cases = split_cases(all_names, train_ratio, val_ratio, seed)
     if not train_cases:
         raise RuntimeError("训练集为空，无法降采样。请检查 data_root 与划分比例。")
@@ -130,6 +149,9 @@ def build_experiments(data_root, out_dir, fractions=(0.10, 0.20), seed=42,
             exp_dir,
             seed=seed,
             fraction=fraction,
+            train_ratio=train_ratio,
+            val_ratio=val_ratio,
+            max_cases=max_cases,
             train_cases=sub_train,
             val_cases=val_cases,
             test_cases=test_cases,
@@ -164,11 +186,11 @@ def main(argv=None):
     )
     print("\n==== 降采样实验清单（契约 C manifest）====")
     for path in manifests:
-        with open(path, encoding="utf-8") as f:
-            m = json.load(f)
+        m = load_manifest(path)
         print("已生成:", path)
-        print("  训练 {} 例 | 验证 {} 例 | 测试 {} 例（冻结）| 数据比例 {:.0f}%".format(
-            m["n_train_cases"], m["n_val_cases"], m["n_test_cases"], m["data_fraction"] * 100))
+        print("  训练 {} 例 | 验证 {} 例 | 测试 {} 例（冻结）| 数据比例 {:.0f}% | 划分 {}/{}".format(
+            m["n_train_cases"], m["n_val_cases"], m["n_test_cases"],
+            m["data_fraction"] * 100, m["train_ratio"], m["val_ratio"]))
     return 0
 
 

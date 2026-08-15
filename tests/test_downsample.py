@@ -4,6 +4,8 @@
 运行方式（在仓库根目录）:
     python -m unittest discover -s tests -v
 """
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -70,8 +72,11 @@ class DownsampleTrainTest(unittest.TestCase):
 
     def test_min_one_case_when_tiny(self):
         train = fake_cases(2)
-        sub = ds.downsample_train_cases(train, 0.10, 42)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            sub = ds.downsample_train_cases(train, 0.10, 42)
         self.assertEqual(len(sub), 1)
+        self.assertIn("警告", buf.getvalue())
 
     def test_invalid_fraction_raises(self):
         with self.assertRaises(ValueError):
@@ -108,14 +113,18 @@ class BuildExperimentsTest(unittest.TestCase):
         for p in manifests:
             with open(p, encoding="utf-8") as f:
                 m = json.load(f)
-            # 契约 C 必备字段
-            for key in ("seed", "data_fraction", "train_cases", "val_cases",
-                        "test_cases", "n_train_cases", "n_val_cases", "n_test_cases"):
+            # 契约 C 必备字段（含配置：划分比例与 max_cases）
+            for key in ("seed", "data_fraction", "train_ratio", "val_ratio", "max_cases",
+                        "train_cases", "val_cases", "test_cases",
+                        "n_train_cases", "n_val_cases", "n_test_cases"):
                 self.assertIn(key, m)
             # 4 病例 -> 2 训练 / 1 验证 / 1 测试；训练 2 例降采样后至少 1 例
             self.assertEqual(m["n_val_cases"], 1)
             self.assertEqual(m["n_test_cases"], 1)
             self.assertGreaterEqual(m["n_train_cases"], 1)
+            self.assertEqual(m["train_ratio"], 0.5)
+            self.assertEqual(m["val_ratio"], 0.25)
+            self.assertEqual(m["max_cases"], None)
             self.assertEqual(len(m["train_cases"]), m["n_train_cases"])
             self.assertEqual(len(m["val_cases"]), m["n_val_cases"])
             self.assertEqual(len(m["test_cases"]), m["n_test_cases"])
@@ -125,12 +134,12 @@ class BuildExperimentsTest(unittest.TestCase):
         self.assertEqual(t0, t1)
 
     def _load(self, path):
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
+        return ds.load_manifest(path)
 
     def test_scan_valid_cases(self):
         names = ds.scan_valid_cases(self.root)
         self.assertEqual(names, ["case_%05d" % i for i in range(4)])
+        self.assertEqual(len(ds.scan_valid_cases(self.root, max_cases=2)), 2)
 
 
 if __name__ == "__main__":
