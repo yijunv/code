@@ -1,0 +1,19 @@
+一、交付状态
+人员3 已完成 M1 贝叶斯推理管线的全部开发、测试与交付工作，代码运行成功。
+
+二、已完成的工作
+模型改造：在 UNet 的 DoubleConv 中嵌入 Dropout2d 层，失活率 0.1，使模型具备 MC-Dropout 能力
+
+核心推理函数：实现 mc_predict，支持对单张 CT 切片进行 N 次随机前向采样，输出 mean（平均分割）、variance（逐像素方差）、entropy（逐像素信息熵）、tumor_avg_entropy（肿瘤区域平均熵）四种不确定性度量。
+
+批量保存功能：实现 save_mc_predict_outputs，将测试集 685 个样本的推理结果以 npz + meta.json 格式固化。。
+
+自测验证：在测试集上完成自测，mc_predict 运行正常，输出形状为 (256, 256)。
+
+模块集成：已接入模块12 评估流程，熵图已从占位零替换为真实 entropy 数据，熵相关指标已产出真实值。
+三、交付物路径
+模型权重：/kaggle/working/experiments/data10pct/best_unet.pth
+
+MC 输出：/kaggle/working/experiments/data10pct/mc_outputs/
+
+评估结果：/kaggle/working/experiments/data10pct/evaluation_metrics.csv
