@@ -4,16 +4,16 @@
 二、已完成的工作
 模型改造：在 UNet 的 DoubleConv 中嵌入 Dropout2d 层，失活率 0.1，使模型具备 MC-Dropout 能力
 
-核心推理函数：实现 mc_predict，支持对单张 CT 切片进行 N 次随机前向采样，输出 mean（平均分割）、variance（逐像素方差）、entropy（逐像素信息熵）、tumor_avg_entropy（肿瘤区域平均熵）四种不确定性度量。
+核心推理函数：实现 mc_predict，支持对单张 CT 切片进行 N 次随机前向采样，输出 mean（MC 平均概率图，3×H×W，含逐类置信度）、variance（逐像素方差）、entropy（逐像素信息熵）、tumor_avg_entropy（肿瘤区域平均熵）等不确定性度量。
 
-批量保存功能：实现 save_mc_predict_outputs，将测试集 685 个样本的推理结果以 npz + meta.json 格式固化。。
+批量保存功能：实现 save_mc_predict_outputs，将测试集全部样本的推理结果以 npz + 同名 json 格式固化（契约 A：mean / pred / pred_binary / variance / entropy / label）。
 
-自测验证：在测试集上完成自测，mc_predict 运行正常，输出形状为 (256, 256)。
+自测验证：在测试集上完成自测，mc_predict 运行正常，mean 形状为 (3, 256, 256)，pred / pred_binary / variance / entropy / label 形状为 (256, 256)。
 
 模块集成：已接入模块12 评估流程，熵图已从占位零替换为真实 entropy 数据，熵相关指标已产出真实值。
 三、交付物路径
 模型权重：/kaggle/working/experiments/data10pct/best_unet.pth
 
-MC 输出：/kaggle/working/experiments/data10pct/mc_outputs/
+MC 输出：/kaggle/working/experiments/data10pct/samples/（契约 A：sample_%04d.npz + sample_%04d.json）
 
 评估结果：/kaggle/working/experiments/data10pct/evaluation_metrics.csv
