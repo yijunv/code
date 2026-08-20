@@ -94,9 +94,14 @@ def calculate_all_metrics(pred: np.ndarray, target: np.ndarray, entropy: np.ndar
 
 # 读取模型输出npz文件工具（后期对接真实数据用）
 def load_npz_sample(npz_path: str, mask_npy_path: str):
+    """从契约A的 npz 读取样本预测/熵图/标签（肿瘤二值口径，兼容旧版 npz）"""
     data = np.load(npz_path)
     entropy_map = data["entropy"]
-    mean_pred = data["mean"]
-    pred_mask = (mean_pred > 0.5).astype(np.float32)
+    if "pred_binary" in data.files:
+        pred_mask = data["pred_binary"].astype(np.float32)     # 契约A：肿瘤二值
+    elif "pred" in data.files:
+        pred_mask = (data["pred"] == 2).astype(np.float32)     # 旧版无 pred_binary：由3类argmax推导
+    else:
+        pred_mask = (data["mean"] > 0.5).astype(np.float32)    # 极旧版：mean 为概率图
     target_mask = np.load(mask_npy_path)
     return pred_mask[None, ...], target_mask[None, ...], entropy_map[None, ...]

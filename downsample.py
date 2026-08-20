@@ -9,11 +9,10 @@ seed / 数据量 / 病例清单 / 配置，供人员4 做统计检验与 Risk-Co
 - 划分逻辑与 总模型代码进行中.ipynb 模块4 逐行一致：按病例划分、seed=42、
   n_train=int(n*train_ratio)、n_val=int(n*val_ratio)、test 取剩余，禁止同一病例
   的切片跨集合（避免数据泄漏）；
-- 病例扫描兼容 .nii 与 .nii.gz（模块3 口径），本工具返回病例名（notebook 返回全路径），
-  排序与过滤逻辑一致；
-- 测试集永远冻结：test 始终取全量划分的测试病例，不做任何降采样；
-- 注意：本工具刻意自带与 notebook 相同的划分函数（保证可独立运行、Kaggle 可用），
-  修改划分逻辑时必须同步 notebook 模块4 与这里的实现，或后续抽到 src/ 后两边 import。
+- 病例扫描兼容 .nii 与 .nii.gz（模块3 口径），本工具返回病例名；notebook 模块3/4 已改为
+  直接 import 本文件的 scan_valid_cases / split_cases / _find_volume，写 manifest 也统一走
+  write_manifest（单一事实来源在本文件，修改划分逻辑只需改这里一处）；
+- 测试集永远冻结：test 始终取全量划分的测试病例，不做任何降采样。
 
 命令行用法（本地 4 病例快速验证）：
     python downsample.py --data-root E:/大创/kits19_small --out-dir E:/大创/experiments \
@@ -98,7 +97,8 @@ def load_manifest(path):
 
 
 def write_manifest(experiment_dir, *, seed, fraction, train_ratio, val_ratio, max_cases,
-                   train_cases, val_cases, test_cases, n_total_cases, data_root, img_size=256):
+                   train_cases, val_cases, test_cases, n_total_cases, data_root, img_size=256,
+                   notes=None):
     """按接口契约 C 写出 manifest.json，返回文件路径。"""
     os.makedirs(experiment_dir, exist_ok=True)
     manifest = {
@@ -118,7 +118,7 @@ def write_manifest(experiment_dir, *, seed, fraction, train_ratio, val_ratio, ma
         "train_cases": sorted(train_cases),
         "val_cases": sorted(val_cases),
         "test_cases": sorted(test_cases),
-        "notes": "测试集冻结：test 取全量划分测试病例，不做降采样；train 为降采样后的子集。",
+        "notes": notes or "测试集冻结：test 取全量划分测试病例，不做降采样；train 为降采样后的子集。",
     }
     path = os.path.join(experiment_dir, "manifest.json")
     with open(path, "w", encoding="utf-8") as f:
