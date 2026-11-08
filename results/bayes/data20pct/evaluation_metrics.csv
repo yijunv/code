@@ -1,0 +1,2 @@
+dice,iou,pixel_acc,n_tumor_positive_slices,tumor_mean_entropy,selective_accuracy_all,selective_accuracy_70,selective_accuracy_50,auroc_entropy_wrong,aurc_risk_coverage
+0.6877,0.5241,0.9944,871,0.3793,0.5109,0.5131,0.5528,0.5492,0.4572

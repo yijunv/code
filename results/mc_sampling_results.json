@@ -1,0 +1,34 @@
+{
+  "5": {
+    "n_tumor_positive_slices": 871,
+    "selective_accuracy_all": 0.4914,
+    "selective_accuracy_70": 0.4967,
+    "selective_accuracy_50": 0.5642,
+    "auroc_entropy_wrong": 0.5522,
+    "aurc_risk_coverage": 0.4829
+  },
+  "10": {
+    "n_tumor_positive_slices": 871,
+    "selective_accuracy_all": 0.4868,
+    "selective_accuracy_70": 0.5016,
+    "selective_accuracy_50": 0.539,
+    "auroc_entropy_wrong": 0.5639,
+    "aurc_risk_coverage": 0.4797
+  },
+  "20": {
+    "n_tumor_positive_slices": 871,
+    "selective_accuracy_all": 0.4856,
+    "selective_accuracy_70": 0.5,
+    "selective_accuracy_50": 0.5413,
+    "auroc_entropy_wrong": 0.5589,
+    "aurc_risk_coverage": 0.4793
+  },
+  "50": {
+    "n_tumor_positive_slices": 871,
+    "selective_accuracy_all": 0.4856,
+    "selective_accuracy_70": 0.4885,
+    "selective_accuracy_50": 0.5528,
+    "auroc_entropy_wrong": 0.5592,
+    "aurc_risk_coverage": 0.4795
+  }
+}

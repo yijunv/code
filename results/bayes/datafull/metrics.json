@@ -1,0 +1,19 @@
+{
+  "experiment": "datafull",
+  "best_val_dice": 0.8622,
+  "metrics": {
+    "dice": 0.748,
+    "iou": 0.5974,
+    "pixel_acc": 0.9955,
+    "n_tumor_positive_slices": 871,
+    "tumor_mean_entropy": 0.3861,
+    "selective_accuracy_all": 0.4914,
+    "selective_accuracy_70": 0.4951,
+    "selective_accuracy_50": 0.5528,
+    "auroc_entropy_wrong": 0.5562,
+    "aurc_risk_coverage": 0.4707
+  },
+  "n_train_cases": 147,
+  "n_test_slices": 2119,
+  "dropout_rate": 0.1
+}
