@@ -1,0 +1,19 @@
+{
+  "experiment": "vanilla20pct",
+  "best_val_dice": 0.6284,
+  "metrics": {
+    "dice": 0.5027,
+    "iou": 0.3357,
+    "pixel_acc": 0.9917,
+    "n_tumor_positive_slices": 871,
+    "tumor_mean_entropy": null,
+    "selective_accuracy_all": null,
+    "selective_accuracy_70": null,
+    "selective_accuracy_50": null,
+    "auroc_entropy_wrong": null,
+    "aurc_risk_coverage": null
+  },
+  "n_train_cases": 29,
+  "n_test_slices": 2119,
+  "dropout_rate": 0.0
+}
