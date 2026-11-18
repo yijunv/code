@@ -5,9 +5,9 @@ import os
 import numpy as np
 from scipy import stats
 
-BASE = r"D:\大创代码\output_ft\experiments"
-NAMES = ["data10pct", "data20pct", "datafull"]
-OUT = r"D:\codex工作空间\stats_validation_results.json"
+BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results", "bayes")
+NAMES = ["data10pct", "data20pct", "data30pct", "datafull"]
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results", "stats_validation_results.json")
 
 
 def load(name):

@@ -2,7 +2,10 @@ import csv
 import json
 import os
 
-os.environ.setdefault("MPLCONFIGDIR", r"D:\codex工作空间\.mplcache")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(REPO_DIR, ".mplcache"))
 os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
 
 import matplotlib
@@ -16,11 +19,11 @@ import figstyle
 
 figstyle.apply_style()
 
-BASE = r"D:\大创代码\output_ft\experiments"
-OUT = r"D:\codex工作空间\figures"
+BASE = os.path.join(REPO_DIR, "results", "bayes")
+OUT = os.path.join(REPO_DIR, "assets", "figures")
 os.makedirs(OUT, exist_ok=True)
 
-GROUPS = [("data10pct", "10%"), ("data20pct", "20%"), ("datafull", "full")]
+GROUPS = [("data10pct", "10%"), ("data20pct", "20%"), ("data30pct", "30%"), ("datafull", "full")]
 
 
 def load(name):
@@ -50,7 +53,7 @@ rows = []
 for name, label in GROUPS:
     coverage, selective, _ = load(name)
     rows.append((label, coverage, selective))
-with open(os.path.join(OUT, "risk_coverage_data.csv"), "w", newline="", encoding="utf-8") as f:
+with open(os.path.join(REPO_DIR, "results", "risk_coverage_data.csv"), "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
     w.writerow(["group", "coverage", "selective_accuracy"])
     for label, coverage, selective in rows:
@@ -105,10 +108,10 @@ plt.close(fig)
 dice_values = [read_dice(name) for name, _ in GROUPS]
 labels = [label for _, label in GROUPS]
 fig, ax = plt.subplots(figsize=(89 / 25.4, 60 / 25.4), layout="constrained")
-bars = ax.bar(labels, dice_values, color=figstyle.OKABE_ON_WHITE[:3], width=0.5)
+bars = ax.bar(labels, dice_values, color=figstyle.OKABE_ON_WHITE[:4], width=0.5)
 ax.set_ylabel("Test tumor Dice")
 ax.set_ylim(0, 0.9)
-ax.set_xlim(-0.75, 2.75)
+ax.set_xlim(-0.75, 3.75)
 ax.grid(True, axis="y", alpha=0.3)
 for bar, val in zip(bars, dice_values):
     ax.text(bar.get_x() + bar.get_width() / 2, val + 0.012, f"{val:.3f}", ha="center", va="bottom")

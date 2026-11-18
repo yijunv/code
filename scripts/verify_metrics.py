@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 
-BASE = r"D:\大创代码\output_ft\experiments"
-NAMES = ["data10pct", "data20pct", "datafull"]
+BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results", "bayes")
+NAMES = ["data10pct", "data20pct", "data30pct", "datafull"]
 
 
 def rank_auc(score, label):
