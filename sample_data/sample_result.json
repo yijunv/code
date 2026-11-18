@@ -1,0 +1,8 @@
+{
+  "case": "case_00000",
+  "slice_index_in_volume": 311,
+  "tumor_mean_entropy": 0.23562078177928925,
+  "threshold": 0.5804,
+  "coverage": 0.7,
+  "decision": "accept"
+}

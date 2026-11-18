@@ -9,7 +9,7 @@
 已完成的研究工作（可直接复用）：
 
 - 模型：2D U-Net（3 类：背景/肾脏/肿瘤），在 `scripts/run_experiments.py` 里，类名 `UNet`，推理函数 `mc_predict`。
-- 权重：四组训练好的 `best_unet.pth`，各约 31 MB，是纯 `state_dict`；web 端只接 full 这组，权重放 GitHub Release，不进仓库本体。
+- 权重：四组训练好的 `best_unet.pth`，各约 31 MB，是纯 `state_dict`；web 端只接 full 这组。权重文件由项目方私下发送（网盘/群文件），拿到后放到本地 `models/` 目录，不随仓库分发。
 - 预处理：HU 裁剪 [-200,300] 后归一化 [0,1]，缩放到 256×256（逻辑在 `KiTS19SliceDataset` 里，web 端要把它抽成独立函数）。
 - 推理：MC-Dropout 采样 N=10，输出平均概率、argmax 分割、逐像素熵、逐像素方差、肿瘤二值掩码。
 - 结果：四组实验指标在 `results/bayes/{data10pct,data20pct,data30pct,datafull}/metrics.json`，逐切片熵+Dice 在同目录 `tumor_entropy_scores.csv`，Risk-Coverage 与覆盖图在 `assets/figures/`。
@@ -74,7 +74,7 @@ def mc_predict(model, img, n_samples, device):
 
 模型文件与加载：
 
-- full 权重：`best_unet.pth`，约 31 MB，纯 `state_dict`，放在 GitHub Release，不随仓库分发。
+- full 权重：`best_unet.pth`，约 31 MB，纯 `state_dict`，由项目方私下发送，不随仓库分发。
 - 加载方式：`UNet(dropout_rate=0.1)`，然后 `model.load_state_dict(torch.load("best_unet.pth", map_location="cpu"))`。
 - 其余三组（10%、20%、30%）是研究对照，web 不必接入。
 
@@ -157,11 +157,11 @@ Content-Type: multipart/form-data   # field: file (nifti)
 
 还不具备、需要补的：
 
-- 权重不在仓库，也没传 Release（待项目方上传）。
-- 没有 `src/infer.py`、`src/preprocess.py`（推理服务与预处理函数，Web 团队新写）。
-- 没有 `sample_data/` 脱敏样例（见第七部分）。
-- `verify_metrics.py` 目前硬编码了本机路径、且只含三组，**不能直接给 Web 同学用**，需要改成读仓库 `results/` 并补上 30% 与 full 四组。
-- `requirements.txt` 已存在，但版本是否冻结完整，需 Web 同学装一遍确认。
+- 权重不在仓库，由项目方私下发送给 Web 同学（拿到后放到 `models/` 目录）。
+- 已有 `src/preprocess.py`、`src/infer.py`：在线推理入口（预处理 + 模型加载 + MC 推理 + 阈值分诊），Web 团队可直接参考或在其上包一层 HTTP 服务。
+- 已有 `sample_data/` 脱敏样例（见第七部分）。
+- `verify_metrics.py` 已改成读仓库 `results/` 并含四组，克隆后可直接自检。
+- `requirements.txt` 是最小依赖集；torch 请按各自机器装 CPU/CUDA 对应版本。
 
 ## 七、sample_data 样例包要求（给 Web 团队联调用）
 
@@ -174,7 +174,7 @@ Content-Type: multipart/form-data   # field: file (nifti)
 
 要求：不含原始 NIfTI，不包含任何患者信息；只放一张即可，目的是让 Web 同学不用整套数据集就能端到端调通。
 
-（当前仓库还没有这份样例，待项目方准备。）
+仓库已提供这份样例，直接看 `sample_data/README.md`。
 
 ## 八、最小验证路径（不需要权重和数据）
 
@@ -185,7 +185,7 @@ Web 同学克隆仓库后，先做这几步确认环境能跑：
 3. 打开 `results/stats_validation_results.json`，确认 `data30pct.auroc_entropy_wrong.point=0.6013`、`data10pct.auroc_entropy_wrong.point=0.4878`。
 4. 打开 `assets/figures/`，确认能看到 `risk_coverage.png`、`reliability.png`、`data_scaling_dice.png`、`data_scaling_uncertainty.png`。
 
-（`verify_metrics.py` 等脚本的端到端自检需要权重/数据，见第六部分；在脚本修好前不要依赖它。）
+（`verify_metrics.py` 只读仓库 `results/`，不需要权重和数据；`mc_sampling_study.py`、`plot_overlays.py` 这类复现脚本才需要本地数据集和权重。）
 
 ## 九、建议的仓库结构（目标态）
 
@@ -195,8 +195,8 @@ repo/
   LICENSE
   requirements.txt
   src/
-    infer.py            # 推理服务入口（Web 团队新写）
-    preprocess.py       # 预处理函数（Web 团队新写）
+    infer.py            # 推理服务入口（已有，可参考）
+    preprocess.py       # 预处理函数（已有，可参考）
   scripts/              # 现有脚本
     run_experiments.py
     verify_metrics.py
@@ -208,7 +208,7 @@ repo/
     figstyle.py
   tests/
   configs/              # 阈值/覆盖率配置（从硬编码抽出，待补）
-  sample_data/          # 脱敏样例（待准备，见第七部分）
+  sample_data/          # 脱敏样例（已有，见第七部分）
   results/              # 四组 bayes + 三组 vanilla + 统计 json
   assets/figures/
   docs/
@@ -243,7 +243,7 @@ repo/
 | 克隆不依赖本机路径 | 克隆后按 README 能跑，无任何绝对路径 | Web 同学 |
 | 无敏感信息 | 仓库不含凭证、真实影像、个人信息 | 交接负责人 |
 | MVP 可独立演示 | 不接真实推理也能用预计算结果演示完整流程 | Web 同学 |
-| 真实推理可跑 | 用 Release 的 full 权重 + 样例数据，单张切片出分割/熵/分诊结论 | Web 同学 |
+| 真实推理可跑 | 用项目方私发的 full 权重 + 样例数据，单张切片出分割/熵/分诊结论 | Web 同学 |
 
 ## 十二、已知限制与待解决问题
 
@@ -251,14 +251,12 @@ P0（开始前必须确认）：
 
 - 公开授权：已确认，代码/结果/权重都可公开。
 - 是否允许上传真实医疗影像（默认否）。
-- `verify_metrics.py` 需改成读仓库 `results/` 并补四组（现在硬编码本机路径）。
 
 P1（MVP 前应解决）：
 
 - 预处理逻辑从 `KiTS19SliceDataset` 抽出为独立函数。
 - 确定 MVP 用预计算样例还是接真实推理。
 - 页面显著标注「研究原型，非临床诊断」。
-- 准备 `sample_data/` 脱敏样例。
 
 P2（完整系统上线前解决）：
 
