@@ -19,7 +19,7 @@ MC Dropout N=10。额外补上被删掉的普通 UNet 对照组（DROPOUT_RATE=0
     python run_experiments.py --cv
 
 4) 本地 4 例冒烟（先确认逻辑能跑通）：
-    python run_experiments.py --data-root E:/大创/kits19_small --max-cases 4 --epochs 1 --batch-size 2
+    python run_experiments.py --data-root <数据目录> --max-cases 4 --epochs 1 --batch-size 2
 
 5) 中断后从断点继续训练（断点会自动保存，重跑时加 --resume 即可）：
     python run_experiments.py --data-root <数据目录> --variants bayes --fractions 1.00 --resume

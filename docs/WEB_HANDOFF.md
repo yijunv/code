@@ -214,7 +214,6 @@ repo/
   docs/
     WEB_HANDOFF.md
     PAPER_HANDOFF.md
-    GITHUB_EXPORT_MANIFEST.md
   deployment/           # 部署说明（后续）
 ```
 

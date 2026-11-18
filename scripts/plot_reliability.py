@@ -1,7 +1,10 @@
 import json
 import os
 
-os.environ.setdefault("MPLCONFIGDIR", r"D:\codex工作空间\.mplcache")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(REPO_DIR, ".mplcache"))
 os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
 
 import matplotlib
@@ -13,12 +16,12 @@ import figstyle
 
 figstyle.apply_style()
 
-RESULTS = r"D:\codex工作空间\stats_validation_results.json"
-OUT = r"D:\codex工作空间\figures"
+RESULTS = os.path.join(REPO_DIR, "results", "stats_validation_results.json")
+OUT = os.path.join(REPO_DIR, "assets", "figures")
 
-STYLES = ["-", "--", "-."]
-MARKERS = ["o", "s", "^"]
-LABELS = {"data10pct": "10%", "data20pct": "20%", "datafull": "full"}
+STYLES = ["-", "--", "-.", ":"]
+MARKERS = ["o", "s", "^", "D"]
+LABELS = {"data10pct": "10%", "data20pct": "20%", "data30pct": "30%", "datafull": "full"}
 
 with open(RESULTS, encoding="utf-8") as f:
     data = json.load(f)

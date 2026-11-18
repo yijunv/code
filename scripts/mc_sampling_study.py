@@ -4,17 +4,19 @@ import os
 import numpy as np
 import torch
 
-import run_experiments_new as runexp
+import run_experiments as runexp
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MC_LIST = [5, 10, 20, 50]
 MAX_MC = max(MC_LIST)
 EPS = 1e-8
 
-DATA_ROOT = r"D:\大创代码\kits19\datasets"
-MODEL_PATH = r"D:\大创代码\output_ft\experiments\datafull\best_unet.pth"
-MANIFEST = r"D:\大创代码\output_ft\experiments\datafull\manifest.json"
-OUT = r"D:\codex工作空间\mc_sampling_results.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+DATA_ROOT = os.environ.get("KITS19_DATA_ROOT", "")
+MODEL_PATH = os.environ.get("KITS19_MODEL_PATH", "")
+MANIFEST = os.environ.get("KITS19_MANIFEST", "")
+OUT = os.path.join(REPO_DIR, "results", "mc_sampling_results.json")
 
 
 def mc_aggregate(probs_k):
@@ -70,6 +72,8 @@ def summarize(ent, dice):
 
 
 def main():
+    if not (DATA_ROOT and MODEL_PATH and MANIFEST):
+        raise SystemExit("需要设置环境变量 KITS19_DATA_ROOT / KITS19_MODEL_PATH / KITS19_MANIFEST（本地数据与权重路径）")
     with open(MANIFEST, encoding="utf-8") as f:
         test_cases = json.load(f)["test_cases"]
     paths = [os.path.join(DATA_ROOT, c) for c in test_cases]

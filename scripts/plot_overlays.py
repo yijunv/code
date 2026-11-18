@@ -2,7 +2,10 @@ import glob
 import json
 import os
 
-os.environ.setdefault("MPLCONFIGDIR", r"D:\codex工作空间\.mplcache")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(REPO_DIR, ".mplcache"))
 os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
 
 import matplotlib
@@ -13,14 +16,17 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 import figstyle
-import run_experiments_new as runexp
+import run_experiments as runexp
 
 figstyle.apply_style()
 
-DATA_ROOT = r"D:\大创代码\kits19\datasets"
-MANIFEST = r"D:\大创代码\output_ft\experiments\datafull\manifest.json"
-SAMPLES = r"D:\大创代码\output_ft\experiments\datafull\samples"
-OUT = r"D:\codex工作空间\figures"
+DATA_ROOT = os.environ.get("KITS19_DATA_ROOT", "")
+MANIFEST = os.environ.get("KITS19_MANIFEST", "")
+SAMPLES = os.environ.get("KITS19_SAMPLES", "")
+OUT = os.path.join(REPO_DIR, "assets", "figures")
+
+if not (DATA_ROOT and MANIFEST and SAMPLES):
+    raise SystemExit("需要设置环境变量 KITS19_DATA_ROOT / KITS19_MANIFEST / KITS19_SAMPLES（本地数据与 samples 目录）")
 
 
 def tumor_mean_entropy(f):

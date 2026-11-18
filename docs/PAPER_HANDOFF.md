@@ -4,9 +4,9 @@
 
 ## 0. 材料缺口清单（请在接手前补充）
 
-1. **论文初稿已提供，但其中实验数字与本组实际结果严重不符**：初稿位于本机微信聊天文件临时目录（完整路径含个人微信 ID，公开版本已脱敏）。已通读，发现 Dice、选择性准确率、ECE、5 折交叉验证、Pearson 相关、Risk-Coverage AUC 等大量数字与本组实际结果不一致，详见 6.5 节。建议把初稿复制到 `D:\codex工作空间` 归档。
-2. **申报书未纳入工作区**：申报书位于本机微信聊天文件临时目录（完整路径含个人微信 ID，公开版本已脱敏）。本组已读取其内容（研究内容五项、技术路线、预算等），但该文件不在受控工作区内，存在被移动/删除的风险。**待确认**：建议复制一份到 `D:\codex工作空间` 归档。
-3. **旧基线“逐切片”原始样本已删**：`D:\大创代码\output\experiments\{data10pct,data20pct,datafull}\samples\` 的 MC 推理 npz 已删除以释放空间；每组 `best_unet.pth` 权重保留，需要时可用权重重新推理生成。若论文要画旧配方的覆盖图，需先重新推理（见复现指南）。
+1. **论文初稿已提供，但其中实验数字与本组实际结果严重不符**：初稿位于本机微信聊天文件临时目录（完整路径含个人微信 ID，公开版本已脱敏）。已通读，发现 Dice、选择性准确率、ECE、5 折交叉验证、Pearson 相关、Risk-Coverage AUC 等大量数字与本组实际结果不一致，详见 6.5 节。建议把初稿复制到 `【本机工作区】` 归档。
+2. **申报书未纳入工作区**：申报书位于本机微信聊天文件临时目录（完整路径含个人微信 ID，公开版本已脱敏）。本组已读取其内容（研究内容五项、技术路线、预算等），但该文件不在受控工作区内，存在被移动/删除的风险。**待确认**：建议复制一份到 `【本机工作区】` 归档。
+3. **旧基线“逐切片”原始样本已删**：`【本机实验目录】\output\experiments\{data10pct,data20pct,datafull}\samples\` 的 MC 推理 npz 已删除以释放空间；每组 `best_unet.pth` 权重保留，需要时可用权重重新推理生成。若论文要画旧配方的覆盖图，需先重新推理（见复现指南）。
 4. **人工阅片对比未做且无数据**：申报书要求“与传统人工阅片流程对比”，本组已决定不做（无人工阅片数据）。论文建议改为与 KiTS19 公开基线 / 文献水平对比。
 
 ## 一、给论文同学的一页速览
@@ -50,15 +50,15 @@
 
 ## 三、方法与实验设置
 
-数据集：KiTS19 公开数据集，共 300 例；前 210 例（case_00000–case_00209）有分割标注，后 90 例（case_00210 起）为官方测试集、只有影像无标注。本组只用前 210 例；划分 147/31/32（训练/验证/测试），seed=42。数据位于 `D:\大创代码\kits19\datasets`。
+数据集：KiTS19 公开数据集，共 300 例；前 210 例（case_00000–case_00209）有分割标注，后 90 例（case_00210 起）为官方测试集、只有影像无标注。本组只用前 210 例；划分 147/31/32（训练/验证/测试），seed=42。数据位于 `【本机实验目录】\kits19\datasets`。
 
 预处理：读 NIfTI 体积，逐轴向切片；仅保留分割标注非空的切片；HU 裁剪到 [-200, 300] 后线性归一化到 [0, 1]；统一缩放到 256×256。类别为 0 背景、1 肾脏、2 肿瘤。测试集共 2119 张切片，其中 871 张含肿瘤。
 
-模型：2D U-Net（base=32，编码-解码，双卷积块含 BatchNorm、ReLU、Dropout2d）。bayes 变体 dropout=0.1；vanilla 变体 dropout=0.0。模型定义见 `D:\codex工作空间\run_experiments_new.py` 与 `D:\大创代码\run_experiments.py`（二者内容一致）。
+模型：2D U-Net（base=32，编码-解码，双卷积块含 BatchNorm、ReLU、Dropout2d）。bayes 变体 dropout=0.1；vanilla 变体 dropout=0.0。模型定义见 `【本机工作区】\run_experiments_new.py` 与 `【本机实验目录】\run_experiments.py`（二者内容一致）。
 
 训练参数（三组 bayes 新配方）：epochs=50、batch_size=8、lr=1e-4（Adam + ReduceLROnPlateau）、focal gamma=2.0、肿瘤类权重 [0.5, 1.0, 8.0]、肿瘤切片过采样权重 3.0、MC 推理采样数 10、seed=42、AMP（自动混合精度）开启。10%/20% 用 full 权重热启动（`--pretrained`），full 从头训练。
 
-运行环境：Windows、Python 3.12（venv 位于 `D:\大创代码\kits19`）、PyTorch 2.11.0+cu128、CUDA 可用、RTX 5060；numpy 2.5.4、scipy 1.18.1、scikit-learn 1.9.1、matplotlib 3.11.2、nibabel 5.4.2；pip 保持 24.3.1（不可升级）。
+运行环境：Windows、Python 3.12（venv 位于 `【本机实验目录】\kits19`）、PyTorch 2.11.0+cu128、CUDA 可用、RTX 5060；numpy 2.5.4、scipy 1.18.1、scikit-learn 1.9.1、matplotlib 3.11.2、nibabel 5.4.2；pip 保持 24.3.1（不可升级）。
 
 评价指标（定义）：
 
@@ -75,7 +75,7 @@
 
 ### 4.1 分割精度（已验证）
 
-bayes 新配方三组，来源 `D:\大创代码\output_ft\experiments\summary.json`（各组 `metrics.json`、`evaluation_metrics.csv`）：
+bayes 新配方三组，来源 `【本机实验目录】\output_ft\experiments\summary.json`（各组 `metrics.json`、`evaluation_metrics.csv`）：
 
 | 组 | 测试 Dice | 测试 IoU | 验证 Dice |
 |---|---|---|---|
@@ -83,9 +83,9 @@ bayes 新配方三组，来源 `D:\大创代码\output_ft\experiments\summary.js
 | 20% | 0.6877 | 0.5241 | 0.7906 |
 | full | 0.7480 | 0.5974 | 0.8622 |
 
-旧配方 bayes 基线（来源 `D:\大创代码\output\experiments\*\metrics.json` 与 `handoff-肾癌CT大创.md`）：测试 Dice 0.4641 / 0.3847 / 0.7114。
+旧配方 bayes 基线（来源 `【本机实验目录】\output\experiments\*\metrics.json` 与 `handoff-肾癌CT大创.md`）：测试 Dice 0.4641 / 0.3847 / 0.7114。
 
-vanilla 三组，来源 `D:\大创代码\output_ft_vanilla\experiments\summary.json`：测试 Dice 0.3526 / 0.5027 / 0.8489（IoU 0.2140 / 0.3357 / 0.7375）。
+vanilla 三组，来源 `【本机实验目录】\output_ft_vanilla\experiments\summary.json`：测试 Dice 0.3526 / 0.5027 / 0.8489（IoU 0.2140 / 0.3357 / 0.7375）。
 
 论文主张—证据—可信度—建议措辞—限制：
 
@@ -202,30 +202,30 @@ vanilla 的 10%/20% 是随机初始化（未用 `--pretrained`），而 bayes �
 
 | 编号 | 路径 | 类型/日期 | 内容 | 验证 | 用途 | 优先级 |
 |---|---|---|---|---|---|---|
-| A01 | `D:\大创代码\output_ft\experiments\summary.json` | JSON，2026-11-07 | bayes 三组汇总指标 | 已验证 | 正文表格主来源 | P0 |
-| A02 | `D:\大创代码\output_ft\experiments\{data10pct,data20pct,datafull}\metrics.json` | JSON | 各组完整指标 | 已验证 | 正文/附录 | P0 |
+| A01 | `【本机实验目录】\output_ft\experiments\summary.json` | JSON，2026-11-07 | bayes 三组汇总指标 | 已验证 | 正文表格主来源 | P0 |
+| A02 | `【本机实验目录】\output_ft\experiments\{data10pct,data20pct,datafull}\metrics.json` | JSON | 各组完整指标 | 已验证 | 正文/附录 | P0 |
 | A03 | 同上目录 `evaluation_metrics.csv` | CSV | 各组指标单行 | 已验证 | 附录 | P1 |
 | A04 | 同上目录 `tumor_entropy_scores.csv` | CSV | 871 张含肿瘤切片逐切片熵+Dice | 已验证 | 画 Risk-Coverage、统计检验的原始数据 | P0 |
 | A05 | 同上目录 `manifest.json` | JSON | 各组配置与病例划分 | 已验证 | 复现 | P0 |
 | A06 | 同上目录 `best_unet.pth` | 权重 | 三组 bayes 模型权重 | 已验证（存在） | 复现/推理/画覆盖图 | P0 |
-| A07 | `D:\大创代码\output_ft_vanilla\experiments\summary.json` | JSON，2026-11-08 | vanilla 三组指标 | 已验证 | 对照 | P0 |
-| A08 | `D:\大创代码\output_ft_vanilla\experiments\{vanilla10pct,vanilla20pct,vanillafull}\metrics.json` | JSON | vanilla 各组指标 | 已验证 | 对照 | P0 |
-| A09 | `D:\大创代码\output\experiments\{data10pct,data20pct,datafull}\metrics.json` | JSON | 旧配方基线指标 | 已验证 | 旧基线对照 | P1 |
-| A10 | `D:\codex工作空间\stats_validation_results.json` | JSON | 统计检验结果 | 已验证 | 正文 4.3 | P0 |
-| A11 | `D:\codex工作空间\mc_sampling_results.json` | JSON | MC 采样研究结果 | 已验证 | 正文 4.5 | P0 |
-| A12 | `D:\codex工作空间\figures\risk_coverage.png/.svg` | 图 | Risk-Coverage 主图+局部放大 | 已生成 | 结果节 | P0 |
-| A13 | `D:\codex工作空间\figures\dice_comparison.png/.svg` | 图 | 三组 Dice 柱状 | 已生成 | 结果节 | P1 |
-| A14 | `D:\codex工作空间\figures\reliability.png/.svg` | 图 | 可靠性图 | 已生成 | 结果/附录 | P1 |
-| A15 | `D:\codex工作空间\figures\overlay_low_uncertainty.png/.svg`、`overlay_high_uncertainty.png/.svg` | 图 | 低/高熵示例的覆盖图+热图 | 已生成 | 图注（对应申报书图2/图3） | P0 |
-| A16 | `D:\codex工作空间\figures\risk_coverage_data.csv` | CSV | Risk-Coverage 曲线底层数据 | 已生成 | 附录数据 | P1 |
-| A17 | `D:\大创代码\run_experiments.py` | 代码 | 权威训练+评估脚本（含新口径） | 已验证（与工作区副本哈希一致） | 复现 | P0 |
-| A18 | `D:\codex工作空间\run_experiments_new.py` | 代码 | 工作区副本 | 已验证 | 修改/复现 | P0 |
-| A19 | `D:\codex工作空间\plot_results.py`、`plot_reliability.py`、`plot_overlays.py`、`figstyle.py` | 代码 | 画图脚本与统一样式 | 已验证 | 重新生成图 | P0 |
-| A20 | `D:\codex工作空间\stats_validation.py`、`mc_sampling_study.py`、`verify_metrics.py` | 代码 | 统计检验/参数搜索/指标自检 | 已验证 | 复现与核查 | P1 |
-| A21 | `D:\codex工作空间\test_eval_metrics.py`、`test_training.py`、`test_mc_study.py`、`test_stats_validation.py` | 代码 | 回归测试 | 已验证（通过） | 内部参考 | P1 |
-| A22 | `D:\codex工作空间\.agents\wayfinder\map.md` 与 `tickets\01~13` | 文档 | 项目地图与决策票据 | 已更新 | 决策溯源 | P1 |
-| A23 | `D:\codex工作空间\handoff-肾癌CT大创.md`、`实验结果汇总.md`、`拒绝机制指标口径.md`、`工作报告与论文手交接.md` | 文档 | 过程与口径说明 | 已更新 | 内部参考 | P1 |
-| A24 | `D:\大创代码\kits19\datasets` | 数据 | KiTS19 原始数据（300 例） | 已确认存在 | 复现必需 | P0 |
+| A07 | `【本机实验目录】\output_ft_vanilla\experiments\summary.json` | JSON，2026-11-08 | vanilla 三组指标 | 已验证 | 对照 | P0 |
+| A08 | `【本机实验目录】\output_ft_vanilla\experiments\{vanilla10pct,vanilla20pct,vanillafull}\metrics.json` | JSON | vanilla 各组指标 | 已验证 | 对照 | P0 |
+| A09 | `【本机实验目录】\output\experiments\{data10pct,data20pct,datafull}\metrics.json` | JSON | 旧配方基线指标 | 已验证 | 旧基线对照 | P1 |
+| A10 | `【本机工作区】\stats_validation_results.json` | JSON | 统计检验结果 | 已验证 | 正文 4.3 | P0 |
+| A11 | `【本机工作区】\mc_sampling_results.json` | JSON | MC 采样研究结果 | 已验证 | 正文 4.5 | P0 |
+| A12 | `【本机工作区】\figures\risk_coverage.png/.svg` | 图 | Risk-Coverage 主图+局部放大 | 已生成 | 结果节 | P0 |
+| A13 | `【本机工作区】\figures\dice_comparison.png/.svg` | 图 | 三组 Dice 柱状 | 已生成 | 结果节 | P1 |
+| A14 | `【本机工作区】\figures\reliability.png/.svg` | 图 | 可靠性图 | 已生成 | 结果/附录 | P1 |
+| A15 | `【本机工作区】\figures\overlay_low_uncertainty.png/.svg`、`overlay_high_uncertainty.png/.svg` | 图 | 低/高熵示例的覆盖图+热图 | 已生成 | 图注（对应申报书图2/图3） | P0 |
+| A16 | `【本机工作区】\figures\risk_coverage_data.csv` | CSV | Risk-Coverage 曲线底层数据 | 已生成 | 附录数据 | P1 |
+| A17 | `【本机实验目录】\run_experiments.py` | 代码 | 权威训练+评估脚本（含新口径） | 已验证（与工作区副本哈希一致） | 复现 | P0 |
+| A18 | `【本机工作区】\run_experiments_new.py` | 代码 | 工作区副本 | 已验证 | 修改/复现 | P0 |
+| A19 | `【本机工作区】\plot_results.py`、`plot_reliability.py`、`plot_overlays.py`、`figstyle.py` | 代码 | 画图脚本与统一样式 | 已验证 | 重新生成图 | P0 |
+| A20 | `【本机工作区】\stats_validation.py`、`mc_sampling_study.py`、`verify_metrics.py` | 代码 | 统计检验/参数搜索/指标自检 | 已验证 | 复现与核查 | P1 |
+| A21 | `【本机工作区】\test_eval_metrics.py`、`test_training.py`、`test_mc_study.py`、`test_stats_validation.py` | 代码 | 回归测试 | 已验证（通过） | 内部参考 | P1 |
+| A22 | `【本机工作区】\.agents\wayfinder\map.md` 与 `tickets\01~13` | 文档 | 项目地图与决策票据 | 已更新 | 决策溯源 | P1 |
+| A23 | `【本机工作区】\handoff-肾癌CT大创.md`、`实验结果汇总.md`、`拒绝机制指标口径.md`、`工作报告与论文手交接.md` | 文档 | 过程与口径说明 | 已更新 | 内部参考 | P1 |
+| A24 | `【本机实验目录】\kits19\datasets` | 数据 | KiTS19 原始数据（300 例） | 已确认存在 | 复现必需 | P0 |
 
 区分说明：A01–A09 为实验产出（含原始数据 A04、A24 与处理后的指标表）；A10–A16 为分析产出与图表；A17–A21 为代码；A22–A23 为过程文档。已删除的临时文件（冒烟产物、旧样本 npz、早期重算脚本）不列入资产清单，需要时按复现指南重新生成。
 
@@ -237,42 +237,42 @@ P0（必发）：
 
 | 发送内容 | 路径 | 如何看 | 有什么用 |
 |---|---|---|---|
-| 交接文档 | `D:\codex工作空间\论文同学交接文档.md` | 文本/Markdown 阅读器 | 理解全貌、查证据、写论文的路线图 |
-| bayes 三组指标 | `D:\大创代码\output_ft\experiments\{data10pct,data20pct,datafull}\metrics.json` 与 `evaluation_metrics.csv` | 文本/Excel 打开 | 分割 Dice/IoU 与拒绝指标的主数字，论文表格来源 |
+| 交接文档 | `【本机工作区】\论文同学交接文档.md` | 文本/Markdown 阅读器 | 理解全貌、查证据、写论文的路线图 |
+| bayes 三组指标 | `【本机实验目录】\output_ft\experiments\{data10pct,data20pct,datafull}\metrics.json` 与 `evaluation_metrics.csv` | 文本/Excel 打开 | 分割 Dice/IoU 与拒绝指标的主数字，论文表格来源 |
 | bayes 三组逐切片数据 | 同上目录 `tumor_entropy_scores.csv` | Excel 打开，三列：sample_id、熵、Dice | 画 Risk-Coverage、做统计检验的原始数据 |
-| vanilla 三组指标 | `D:\大创代码\output_ft_vanilla\experiments\{vanilla10pct,vanilla20pct,vanillafull}\metrics.json` | 文本/Excel 打开 | 标准 U-Net 对照数字 |
-| 统计检验结果 | `D:\codex工作空间\stats_validation_results.json` | 文本打开 | 熵有效性的统计证据（相关系数、p、AUROC 置信区间） |
-| 阈值与采样结果 | `D:\codex工作空间\mc_sampling_results.json` | 文本打开 | MC 采样次数结论与推荐阈值 |
-| 论文配图 | `D:\codex工作空间\figures\risk_coverage.png`、`dice_comparison.png`、`reliability.png`、`overlay_low_uncertainty.png`、`overlay_high_uncertainty.png`（含同名 `.svg`） | 图片查看器；SVG 可用浏览器/矢量工具打开 | 直接用于论文正文/图注 |
-| 曲线底层数据 | `D:\codex工作空间\figures\risk_coverage_data.csv` | Excel 打开 | Risk-Coverage 曲线的数据表，附录用 |
+| vanilla 三组指标 | `【本机实验目录】\output_ft_vanilla\experiments\{vanilla10pct,vanilla20pct,vanillafull}\metrics.json` | 文本/Excel 打开 | 标准 U-Net 对照数字 |
+| 统计检验结果 | `【本机工作区】\stats_validation_results.json` | 文本打开 | 熵有效性的统计证据（相关系数、p、AUROC 置信区间） |
+| 阈值与采样结果 | `【本机工作区】\mc_sampling_results.json` | 文本打开 | MC 采样次数结论与推荐阈值 |
+| 论文配图 | `【本机工作区】\figures\risk_coverage.png`、`dice_comparison.png`、`reliability.png`、`overlay_low_uncertainty.png`、`overlay_high_uncertainty.png`（含同名 `.svg`） | 图片查看器；SVG 可用浏览器/矢量工具打开 | 直接用于论文正文/图注 |
+| 曲线底层数据 | `【本机工作区】\figures\risk_coverage_data.csv` | Excel 打开 | Risk-Coverage 曲线的数据表，附录用 |
 
 P1（建议发）：
 
 | 发送内容 | 路径 | 如何看 | 有什么用 |
 |---|---|---|---|
-| 病例划分与配置 | `D:\大创代码\output_ft\experiments\{三组}\manifest.json` | 文本打开 | 论文手核查训练/验证/测试划分、超参数 |
-| 旧基线指标 | `D:\大创代码\output\experiments\{三组}\metrics.json` | 文本打开 | 旧配方基线对照（0.464/0.385/0.711） |
-| 画图脚本 | `D:\codex工作空间\plot_results.py`、`plot_reliability.py`、`plot_overlays.py`、`figstyle.py` | VSCode/Python | 论文手要改图时重画 |
+| 病例划分与配置 | `【本机实验目录】\output_ft\experiments\{三组}\manifest.json` | 文本打开 | 论文手核查训练/验证/测试划分、超参数 |
+| 旧基线指标 | `【本机实验目录】\output\experiments\{三组}\metrics.json` | 文本打开 | 旧配方基线对照（0.464/0.385/0.711） |
+| 画图脚本 | `【本机工作区】\plot_results.py`、`plot_reliability.py`、`plot_overlays.py`、`figstyle.py` | VSCode/Python | 论文手要改图时重画 |
 
 P2（选发，论文手要复现或重出图时才发）：
 
 | 发送内容 | 路径 | 如何看 | 有什么用 |
 |---|---|---|---|
-| 模型权重 | `D:\大创代码\output_ft\experiments\{三组}\best_unet.pth`（各约 31 MB） | PyTorch 加载 | 复现推理、重画覆盖图 |
-| 全部代码 | `D:\大创代码\run_experiments.py`、`D:\codex工作空间\run_experiments_new.py`、`stats_validation.py`、`mc_sampling_study.py`、`verify_metrics.py`、四个 `test_*.py` | VSCode/Python | 完整复现与核查（见第八部分） |
+| 模型权重 | `【本机实验目录】\output_ft\experiments\{三组}\best_unet.pth`（各约 31 MB） | PyTorch 加载 | 复现推理、重画覆盖图 |
+| 全部代码 | `【本机实验目录】\run_experiments.py`、`【本机工作区】\run_experiments_new.py`、`stats_validation.py`、`mc_sampling_study.py`、`verify_metrics.py`、四个 `test_*.py` | VSCode/Python | 完整复现与核查（见第八部分） |
 
 说明：论文手若只写论文、不跑代码，发 P0 + P1 即可；若需要复现或修改图，再补发 P2。数据集（KiTS19，约几十 GB）不必发送，论文手按第八部分自行获取或在本机复现。
 
 ## 八、复现与核查指南
 
-环境：无需新装软件。用 VSCode 打开 `D:\codex工作空间`，右下角解释器选 `D:\大创代码\kits19\Scripts\python.exe`（关键，否则终端 python 无 torch）；或在命令里直接用完整路径。训练需 NVIDIA 驱动 + CUDA（已装，`torch.cuda.is_available()` 应为 True）。pip 保持 24.3.1，勿升级。
+环境：无需新装软件。用 VSCode 打开 `【本机工作区】`，右下角解释器选 `【本机实验目录】\kits19\Scripts\python.exe`（关键，否则终端 python 无 torch）；或在命令里直接用完整路径。训练需 NVIDIA 驱动 + CUDA（已装，`torch.cuda.is_available()` 应为 True）。pip 保持 24.3.1，勿升级。
 
-数据位置：`D:\大创代码\kits19\datasets`（前 210 例带标注，case_00000–case_00209）。
+数据位置：`【本机实验目录】\kits19\datasets`（前 210 例带标注，case_00000–case_00209）。
 
 复现 bayes 三组（迁移学习版，约 10% 26 分钟、20% 34 分钟、full 130 分钟）：
 
 ```
-D:\大创代码\kits19\Scripts\python.exe D:\大创代码\run_experiments.py --data-root D:\大创代码\kits19\datasets --out-dir D:\大创代码\output_ft --variants bayes --fractions 0.10,0.20,1.00 --epochs 50 --batch-size 8 --lr 1e-4 --mc-samples 10 --focal-gamma 2.0 --tumor-oversample 3.0 --pretrained D:\大创代码\output\experiments\datafull\best_unet.pth
+【本机实验目录】\kits19\Scripts\python.exe 【本机实验目录】\run_experiments.py --data-root 【本机实验目录】\kits19\datasets --out-dir 【本机实验目录】\output_ft --variants bayes --fractions 0.10,0.20,1.00 --epochs 50 --batch-size 8 --lr 1e-4 --mc-samples 10 --focal-gamma 2.0 --tumor-oversample 3.0 --pretrained 【本机实验目录】\output\experiments\datafull\best_unet.pth
 ```
 
 说明：10%/20% 用 `--pretrained`（full 旧权重热启动）；full 应去掉 `--pretrained` 从头训练。中断后续跑加 `--resume`。输出在 `--out-dir\experiments\data{10pct,20pct,full}`，产物为 metrics.json、evaluation_metrics.csv、tumor_entropy_scores.csv、manifest.json、best_unet.pth、samples/*.npz。
@@ -280,18 +280,18 @@ D:\大创代码\kits19\Scripts\python.exe D:\大创代码\run_experiments.py --d
 复现 vanilla 三组（随机初始化）：
 
 ```
-D:\大创代码\kits19\Scripts\python.exe D:\大创代码\run_experiments.py --data-root D:\大创代码\kits19\datasets --out-dir D:\大创代码\output_ft_vanilla --variants vanilla --fractions 0.10,0.20,1.00 --epochs 50 --batch-size 8 --lr 1e-4 --focal-gamma 2.0 --tumor-oversample 3.0
+【本机实验目录】\kits19\Scripts\python.exe 【本机实验目录】\run_experiments.py --data-root 【本机实验目录】\kits19\datasets --out-dir 【本机实验目录】\output_ft_vanilla --variants vanilla --fractions 0.10,0.20,1.00 --epochs 50 --batch-size 8 --lr 1e-4 --focal-gamma 2.0 --tumor-oversample 3.0
 ```
 
-（可选）vanilla 迁移学习版消融：`--variants vanilla --fractions 0.10,0.20 --pretrained D:\大创代码\output_ft_vanilla\experiments\vanillafull\best_unet.pth --out-dir D:\大创代码\output_ft_vanilla_ft`。
+（可选）vanilla 迁移学习版消融：`--variants vanilla --fractions 0.10,0.20 --pretrained 【本机实验目录】\output_ft_vanilla\experiments\vanillafull\best_unet.pth --out-dir 【本机实验目录】\output_ft_vanilla_ft`。
 
 重算/核查（不重训，直接跑）：
 
-- 指标自检：`D:\大创代码\kits19\Scripts\python.exe D:\codex工作空间\verify_metrics.py`（独立重算三组选择性准确率/AUROC/AURC，与 A02 对账）。
+- 指标自检：`【本机实验目录】\kits19\Scripts\python.exe 【本机工作区】\verify_metrics.py`（独立重算三组选择性准确率/AUROC/AURC，与 A02 对账）。
 - 统计检验：`...\stats_validation.py`（产出 stats_validation_results.json）。
 - MC 采样研究：`...\mc_sampling_study.py`（需加载 full 测试集，约 5–10 分钟）。
 - 画图：`...\plot_results.py`、`...\plot_reliability.py`、`...\plot_overlays.py`（plot_overlays 需重新加载测试集约 1 分钟）。
-- 回归测试：`D:\大创代码\kits19\Scripts\python.exe -m unittest test_eval_metrics test_training test_mc_study test_stats_validation -v`。
+- 回归测试：`【本机实验目录】\kits19\Scripts\python.exe -m unittest test_eval_metrics test_training test_mc_study test_stats_validation -v`。
 
 如何判断成功：训练日志每 epoch 输出 train_loss 与 val_dice；最终 summary.json 中的 Dice 应落在上述数值附近（seed=42 固定，理想情况下数值一致；因硬件/浮点差异允许极小波动）。统计脚本打印的数值应与 A10/A11 一致。
 
@@ -356,7 +356,7 @@ D:\大创代码\kits19\Scripts\python.exe D:\大创代码\run_experiments.py --d
 
 ## 接手第一步（面向论文手，无需访问作者电脑）
 
-你拿到的文件包（或 GitHub 仓库）里，文件按目录组织（bayes/、vanilla/、旧基线/、figures/、代码/ 等），文件名与本文档第七部分资产清单一致。本文中出现的 `D:\...` 是作者电脑上的原始位置，仅供溯源，你不需要访问；你只需对着文件包里的同名文件即可。
+你拿到的文件包（或 GitHub 仓库）里，文件按目录组织（bayes/、vanilla/、旧基线/、figures/、代码/ 等），文件名与本文档第七部分资产清单一致。本文中出现的「本机实验目录」「本机工作区」等占位是作者电脑上的原始位置，仅供溯源，你不需要访问；你只需对着文件包里的同名文件即可。
 
 1. 读第一部分“一页速览”和第四部分“结果证据链”，建立“数字 ↔ 文件”的对应（每个数字旁标注了 A01–A16 编号，对应文件包内同名文件）。
 2. 读第六部分“与申报书的对照”和 6.5 节“与论文初稿的对照”，明确初稿中哪些数字要替换、哪些结论要重写。

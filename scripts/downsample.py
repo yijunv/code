@@ -15,7 +15,7 @@ seed / 数据量 / 病例清单 / 配置，供人员4 做统计检验与 Risk-Co
 - 测试集永远冻结：test 始终取全量划分的测试病例，不做任何降采样。
 
 命令行用法（本地 4 病例快速验证）：
-    python downsample.py --data-root E:/大创/kits19_small --out-dir E:/大创/experiments \
+    python downsample.py --data-root <数据目录> --out-dir <输出目录> \
         --fractions 0.10,0.20 --seed 42 --train-ratio 0.5 --val-ratio 0.25 --max-cases 4
 
 Kaggle 全量跑：
