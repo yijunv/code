@@ -10,10 +10,10 @@
 已完成的研究工作（可直接复用）：
 
 - 模型：2D U-Net（3 类：背景/肾脏/肿瘤），代码 `run_experiments_new.py` 中 `UNet`（约 192 行）、`mc_predict`（约 457 行）。
-- 权重：三组训练好的 `best_unet.pth`，各约 29.7 MB，推荐使用 full 组 `D:\大创代码\output_ft\experiments\datafull\best_unet.pth`。
+- 权重：四组训练好的 `best_unet.pth`，各约 29.7 MB，推荐使用 full 组 `D:\大创代码\output_ft\experiments\datafull\best_unet.pth`。
 - 预处理：HU 裁剪 [-200,300] 后归一化 [0,1]，缩放到 256×256（在 `KiTS19SliceDataset` 中实现）。
 - 推理：MC-Dropout 采样 N=10 次，输出平均概率、argmax 分割、逐像素熵、逐像素方差、肿瘤二值掩码。
-- 结果：三组实验指标（`output_ft\experiments\*\metrics.json`）、逐切片熵+Dice（`tumor_entropy_scores.csv`）、Risk-Coverage 曲线与覆盖图（`figures\`）。
+- 结果：四组实验指标（`output_ft\experiments\*\metrics.json`）、逐切片熵+Dice（`tumor_entropy_scores.csv`）、Risk-Coverage 曲线与覆盖图（`figures\`）。
 
 推荐的最小可行系统（MVP）：先用预计算样例与结果图做页面展示（上传样例选择、原始图、分割掩码、熵热图、分诊结论、指标展示），不接真实模型推理；验证 UI 后，再接入真实推理。
 
